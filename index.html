@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator</title>
+    
+    <!-- Include PyScript for Python support in the browser -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #a81818; /* red warm background */
+            color: #444;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            width: 300px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #f0f32c; /* light yellow  */
+        }
+
+        input {
+            margin: 8px 0;
+            padding: 10px;
+            border: 2px solid #f0f32c; /* light yellow  */
+            border-radius: 6px;
+            width: calc(100% - 22px);
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #f0f32c; /* light yellow on focus */
+            outline: none;
+        }
+
+        button {
+            margin: 12px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background-color: #f0f32c; /*  light yellow  */
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #f0f32c; /*  light yellow on hover */
+        }
+
+        p {
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #a81818; /* red warm background for result */
+            color: #ffffff; /* white text */
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prelim Grade Calculator</h1>
+
+        <input type="number" id="absences" placeholder="Number of Absences" min="0" />
+        <input type="number" id="prelim_exam" placeholder="Prelim Exam Grade (0-100)" min="0" max="100" />
+        <input type="number" id="quizzes" placeholder="Quizzes Grade (0-100)" min="0" max="100" />
+        <input type="number" id="requirements" placeholder="Requirements Grade (0-100)" min="0" max="100" />
+        <input type="number" id="recitation" placeholder="Recitation Grade (0-100)" min="0" max="100" />
+
+        <button id="calculateButton">Calculate Grades</button>
+        <p id="result"></p>
+    </div>
+
+    <py-script>
+        from pyscript import Element
+
+        def calculate_grades(event):
+            try:
+                absences = int(Element("absences").element.value)
+                prelim_exam = float(Element("prelim_exam").element.value)
+                quizzes = float(Element("quizzes").element.value)
+                requirements = float(Element("requirements").element.value)
+                recitation = float(Element("recitation").element.value)
+
+                if absences >= 4:
+                    Element("result").write("FAILED: 4 or more absences.")
+                    Element("result").element.style.display = "block"
+                    return
+
+                attendance = max(0, 100 - absences * 10)
+                class_standing = (quizzes * 0.4) + (requirements * 0.3) + (recitation * 0.3)
+                prelim_grade = round((prelim_exam * 0.6) + (attendance * 0.1) + (class_standing * 0.3), 2)
+
+                target_passing = (75 - prelim_grade * 0.2) / 0.8
+                target_deans_list = (90 - prelim_grade * 0.2) / 0.8
+
+                Element("result").write(
+                    f"Prelim Grade: {prelim_grade}\n"
+                    f"To pass: {target_passing:.2f}\n"
+                    f"To achieve Dean's List: {target_deans_list:.2f}."
+                )
+                Element("result").element.style.display = "block"
+
+            except ValueError as e:
+                Element("result").write("Please enter valid numbers.")
+                Element("result").element.style.display = "block"
+
+        Element("calculateButton").element.onclick = calculate_grades
+    </py-script>
+</body>
+</html>
